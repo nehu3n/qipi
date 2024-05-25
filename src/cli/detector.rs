@@ -2,10 +2,10 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 
-pub fn detect_config_files(dir_path: &str) -> String {
-    let config_files: [&str; 3] = ["package.json", "Gemfile", "requirements.txt"];
+pub fn detect_manifiest_files(dir_path: &str) -> String {
+    let manifiest_files: [&str; 3] = ["package.json", "Gemfile", "requirements.txt"];
 
-    for file in config_files.iter() {
+    for file in manifiest_files.iter() {
         let path = format!("{}/{}", dir_path, file);
         if fs::metadata(&path).is_ok() {
             match file {
@@ -17,6 +17,24 @@ pub fn detect_config_files(dir_path: &str) -> String {
         }
     }
 
+    "".to_string()
+}
+
+pub fn detect_cross_lockfile(dir_path: &str, language: &str) -> String {
+    if language == "js" {
+        let lock_files: [&str; 3] = ["pnpm-lock.yaml", "yarn.lock", "package-lock.json"];
+
+        for file in lock_files.iter() {
+            let path = format!("{}/{}", dir_path, file);
+            if fs::metadata(&path).is_ok() {
+                return file.to_string();
+            }
+        }
+    } else if language == "py" {
+        todo!("Detect cross lockfile for Python");
+    } else if language == "rb" {
+        todo!("Detect cross lockfile for Ruby");
+    }
     "".to_string()
 }
 

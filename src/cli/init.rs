@@ -35,7 +35,7 @@ enum Commands {
         lock: bool,
 
         #[arg(long, value_enum)]
-        lock_cross: Option<LockCross>,
+        lock_cross: bool,
 
         packages: Vec<String>,
     },
