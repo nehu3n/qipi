@@ -5,7 +5,13 @@ mod cli {
     pub mod detector;
     pub mod init;
 }
+mod manager {
+    pub mod js {
+        pub mod obtain;
+    }
+}
 
-fn main() {
-    cli::init::init_cli()
+#[tokio::main]
+async fn main() {
+    cli::init::init_cli().await;
 }

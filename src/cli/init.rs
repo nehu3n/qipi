@@ -90,7 +90,7 @@ enum Commands {
     Init,
 }
 
-pub fn init_cli() {
+pub async fn init_cli() {
     let args = Cli::parse();
 
     match args.command {
@@ -101,7 +101,7 @@ pub fn init_cli() {
             lock,
             lock_cross,
             packages,
-        } => add_command_action(js, py, rb, lock, lock_cross, packages),
+        } => add_command_action(js, py, rb, lock, lock_cross, packages).await,
         Commands::Remove {
             js,
             py,

@@ -1,3 +1,4 @@
+use crate::manager::js::obtain::obtain_package;
 use std::{collections::HashMap, env};
 
 use colored::Colorize;
@@ -9,7 +10,7 @@ use crate::cli::detector::{
     is_known_extension,
 };
 
-pub fn add_command_action(
+pub async fn add_command_action(
     js: bool,
     py: bool,
     rb: bool,
@@ -374,7 +375,11 @@ pub fn add_command_action(
         }
     } else {
         for package in packages {
-            println!("{} {}", "📦", package.to_string().green());
+            // println!("{} {}", "📦", package.to_string().green());
+            let (name, version) = package.split_once('@').unwrap_or((&package, "latest"));
+
+            let package = obtain_package(name, version).await.unwrap();
+            println!("{:?}", package);
         }
     }
 }
