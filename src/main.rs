@@ -7,6 +7,9 @@ mod cli {
 }
 mod manager {
     pub mod js {
+        pub mod packages {
+            pub mod cache;
+        }
         pub mod lockfile {
             pub mod cross;
             pub mod qp;

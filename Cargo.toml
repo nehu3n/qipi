@@ -16,3 +16,6 @@ reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 rkyv = { version = "=0.7.44", features = ["validation"] }
 yaml-rust2 = "0.8"
+simple-home-dir = "0.3.4"
+flate2 = "1.0.30"
+tar = "0.4.40"

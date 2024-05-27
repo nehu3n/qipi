@@ -3,14 +3,14 @@ use std::collections::HashMap;
 use rkyv::{Archive, Deserialize, Serialize};
 
 #[archive(check_bytes)]
-#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize)]
+#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize, Clone)]
 pub struct PackageRepository {
     pub r#type: String,
     pub url: String,
 }
 
 #[archive(check_bytes)]
-#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize)]
+#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize, Clone)]
 pub struct PackageDist {
     pub integrity: String,
     pub shasum: String,
@@ -18,7 +18,7 @@ pub struct PackageDist {
 }
 
 #[archive(check_bytes)]
-#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize)]
+#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize, Clone)]
 pub struct Package {
     pub name: String,
     pub version: String,

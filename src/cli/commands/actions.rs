@@ -1,4 +1,5 @@
 use crate::manager::js::{
+    packages::cache::{add_package_to_cache, exists_package_in_cache},
     lockfile::{
         cross::{cross_lockfile_npm_parser, cross_lockfile_pnpm_parser},
         qp::{add_package_to_lockfile, get_package_from_lockfile},
@@ -390,14 +391,18 @@ pub async fn add_command_action(
             // println!("{} {}", "📦", package.to_string().green());
             let (name, version) = package.split_once('@').unwrap_or((&package, "latest"));
 
-            if let Some(package) = get_package_from_lockfile(name) {
-                if package.name == name {
-                    return;
-                }
+            let package_obtain = obtain_package(name, version).await.unwrap();
+            let package_cache = package_obtain.clone();
+
+            if !exists_package_in_cache(&package_cache) {
+                add_package_to_cache(package_cache).await;
             }
 
-            let package = obtain_package(name, version).await.unwrap();
-            add_package_to_lockfile(package);
+            if let Some(package_lockfile) = get_package_from_lockfile(name) {
+                if package_lockfile.name != name {
+                    add_package_to_lockfile(package_obtain);
+                }
+            }
         }
     }
 }
