@@ -60,13 +60,25 @@ pub fn add_package_to_lockfile(package: Package) {
 }
 
 pub fn get_package_from_lockfile(name: &str) -> Option<Package> {
+    if !Path::new(LOCKFILE_NAME).exists() {
+        File::create(LOCKFILE_NAME).unwrap();
+    }
+
     let mut lockfile = File::open(LOCKFILE_NAME).unwrap();
 
     let metadata = fs::metadata(LOCKFILE_NAME).unwrap();
     let mut buffer = vec![0; metadata.len() as usize];
     lockfile.read(&mut buffer).unwrap();
 
+    if buffer.is_empty() {
+        return None;
+    }
+
     let bytes: Lockfile = rkyv::from_bytes(&buffer).unwrap();
+
+    if bytes.packages.is_empty() {
+        return None;
+    }
 
     for package in bytes.packages {
         if package.name == name {
