@@ -8,6 +8,7 @@ mod cli {
 mod manager {
     pub mod js {
         pub mod lockfile {
+            pub mod cross;
             pub mod qp;
         }
         pub mod obtain;

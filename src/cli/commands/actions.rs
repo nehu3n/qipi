@@ -1,5 +1,8 @@
 use crate::manager::js::{
-    lockfile::qp::{add_package_to_lockfile, get_package_from_lockfile},
+    lockfile::{
+        cross::{cross_lockfile_npm_parser, cross_lockfile_pnpm_parser},
+        qp::{add_package_to_lockfile, get_package_from_lockfile},
+    },
     obtain::obtain_package,
 };
 use std::{collections::HashMap, env};
@@ -65,7 +68,13 @@ pub async fn add_command_action(
                     .unwrap();
 
                 if ans_cross_lockfile {
-                    todo!("Add packages from cross-lockfile");
+                    if adm_lock_file == "pnpm-lock.yaml" {
+                        cross_lockfile_pnpm_parser();
+                    } else if adm_lock_file == "yarn.lock" {
+                        todo!("Add packages from yarn cross-lockfile");
+                    } else if adm_lock_file == "package-lock.json" {
+                        cross_lockfile_npm_parser();
+                    }
                 } else {
                     let options: Vec<&str> = vec![
                         "pnpm-lock.yaml (pnpm)",
