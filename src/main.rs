@@ -9,6 +9,7 @@ mod manager {
     pub mod js {
         pub mod packages {
             pub mod cache;
+            pub mod link;
         }
         pub mod lockfile {
             pub mod cross;

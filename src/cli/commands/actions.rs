@@ -1,10 +1,13 @@
 use crate::manager::js::{
-    packages::cache::{add_package_to_cache, exists_package_in_cache},
     lockfile::{
         cross::{cross_lockfile_npm_parser, cross_lockfile_pnpm_parser},
         qp::{add_package_to_lockfile, get_package_from_lockfile},
     },
     obtain::obtain_package,
+    packages::{
+        cache::{add_package_to_cache, exists_package_in_cache},
+        link::link_package,
+    },
 };
 use std::{collections::HashMap, env};
 
@@ -395,8 +398,10 @@ pub async fn add_command_action(
             let package_cache = package_obtain.clone();
 
             if !exists_package_in_cache(&package_cache) {
-                add_package_to_cache(package_cache).await;
+                add_package_to_cache(package_cache.clone()).await;
             }
+
+            link_package(&package_cache);
 
             if let Some(package_lockfile) = get_package_from_lockfile(name) {
                 if package_lockfile.name != name {
