@@ -1,21 +1,24 @@
 use std::collections::HashMap;
 
-use serde::Deserialize;
+use rkyv::{Archive, Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+#[archive(check_bytes)]
+#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize)]
 pub struct PackageRepository {
     pub r#type: String,
     pub url: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[archive(check_bytes)]
+#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize)]
 pub struct PackageDist {
     pub integrity: String,
     pub shasum: String,
     pub tarball: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[archive(check_bytes)]
+#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize)]
 pub struct Package {
     pub name: String,
     pub version: String,

@@ -1,4 +1,7 @@
-use crate::manager::js::obtain::obtain_package;
+use crate::manager::js::{
+    lockfile::qp::{add_package_to_lockfile, get_package_from_lockfile},
+    obtain::obtain_package,
+};
 use std::{collections::HashMap, env};
 
 use colored::Colorize;
@@ -378,8 +381,14 @@ pub async fn add_command_action(
             // println!("{} {}", "📦", package.to_string().green());
             let (name, version) = package.split_once('@').unwrap_or((&package, "latest"));
 
+            if let Some(package) = get_package_from_lockfile(name) {
+                if package.name == name {
+                    return;
+                }
+            }
+
             let package = obtain_package(name, version).await.unwrap();
-            println!("{:?}", package);
+            add_package_to_lockfile(package);
         }
     }
 }
