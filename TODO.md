@@ -5,10 +5,10 @@
 ## 📑 Tasks
 
 - [x] _Configure initial files for repository._
-- [ ] _Create CLI skeleton and commands._
-- [ ] _**JS Manager:** Create package recovery functions._
+- [x] _Create CLI skeleton and commands._
+- [x] _**JS Manager:** Create package recovery functions._
 - [ ] _Benchmarking_
-- [ ] _**JS Manager:** Make lockfile system._
+- [x] _**JS Manager:** Make lockfile system._
 - [ ] _**JS Manager:** Add lockfile compatibility between package managers._
 
 ### ***...***
