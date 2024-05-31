@@ -20,7 +20,11 @@ pub fn link_package(package: &Package) {
     if !Path::new("./node_modules").exists() {
         create_dir("./node_modules").unwrap();
     }
-    
+
     let dst_path = format!("./node_modules/{}", package.name);
+    if Path::new(&dst_path).exists() {
+        return;
+    }
+
     symlink::symlink_dir(&package_dir, dst_path).unwrap();
 }

@@ -392,7 +392,40 @@ pub async fn add_command_action(
     } else {
         for package in packages {
             // println!("{} {}", "📦", package.to_string().green());
-            let (name, version) = package.split_once('@').unwrap_or((&package, "latest"));
+
+            #[allow(unused_assignments)]
+            let mut name = "";
+            #[allow(unused_assignments)]
+            let mut version = "";
+            #[allow(unused_assignments)]
+            let mut formatted_name = String::new();
+
+            if package.chars().filter(|&c| c == '@').count() == 2 {
+                let parts: Vec<&str> = package.split('@').collect();
+
+                if parts.len() == 2 {
+                    name = parts[0];
+                    version = parts[1];
+                } else if parts.len() == 3 {
+                    formatted_name = format!("@{}", parts[1]);
+                    name = &formatted_name;
+                    version = parts[2];
+                } else {
+                    name = parts[0];
+                    version = "latest";
+                }
+            } else if package.contains("/") {
+                let parts: Vec<&str> = package.split('/').collect();
+
+                formatted_name = format!("{}/{}", parts[0], parts[1]);
+                name = &formatted_name;
+                version = "latest";
+            } else {
+                let (pkg_name, pkg_version) =
+                    package.split_once('@').unwrap_or((&package, "latest"));
+                name = pkg_name;
+                version = pkg_version;
+            }
 
             let package_obtain = obtain_package(name, version).await.unwrap();
             let package_cache = package_obtain.clone();
