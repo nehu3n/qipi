@@ -1,12 +1,17 @@
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{PathBuf, MAIN_SEPARATOR_STR};
 
 pub fn detect_manifiest_files(dir_path: &str) -> String {
     let manifiest_files: [&str; 3] = ["package.json", "Gemfile", "requirements.txt"];
 
     for file in manifiest_files.iter() {
-        let path = format!("{}/{}", dir_path, file);
+        let path = format!(
+            "{}{os_separator}{}",
+            dir_path,
+            file,
+            os_separator = MAIN_SEPARATOR_STR
+        );
         if fs::metadata(&path).is_ok() {
             match file {
                 &"package.json" => return "JavaScript".to_string(),
@@ -25,7 +30,12 @@ pub fn detect_cross_lockfile(dir_path: &str, language: &str) -> String {
         let lock_files: [&str; 3] = ["pnpm-lock.yaml", "yarn.lock", "package-lock.json"];
 
         for file in lock_files.iter() {
-            let path = format!("{}/{}", dir_path, file);
+            let path = format!(
+                "{}{os_separator}{}",
+                dir_path,
+                file,
+                os_separator = MAIN_SEPARATOR_STR
+            );
             if fs::metadata(&path).is_ok() {
                 return file.to_string();
             }
