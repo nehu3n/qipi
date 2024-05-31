@@ -404,10 +404,12 @@ pub async fn add_command_action(
             link_package(&package_cache);
 
             if let Some(package_lockfile) = get_package_from_lockfile(name) {
-                if package_lockfile.name != name {
-                    add_package_to_lockfile(package_obtain);
+                if package_lockfile.name == name {
+                    return;
                 }
             }
+
+            add_package_to_lockfile(package_obtain);
         }
     }
 }

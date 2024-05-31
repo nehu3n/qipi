@@ -3,9 +3,11 @@ use std::collections::HashMap;
 use rkyv::{Archive, Deserialize, Serialize};
 
 #[archive(check_bytes)]
-#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize, Clone)]
+#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, serde::Deserialize, Clone, Default)]
 pub struct PackageRepository {
+    #[serde(default)]
     pub r#type: String,
+    #[serde(default)]
     pub url: String,
 }
 
@@ -23,6 +25,7 @@ pub struct Package {
     pub name: String,
     pub version: String,
     pub description: String,
+    #[serde(default)]
     pub repository: PackageRepository,
     #[serde(default)]
     pub main: String,
