@@ -1,0 +1,8 @@
+[package]
+name = "qipi"
+description = "🦉 The blazing-fast, disk-efficient package manager."
+authors = ["Nehuén <https://github.com/nehu3n>"]
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
