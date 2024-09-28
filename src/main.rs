@@ -1,3 +1,7 @@
+extern crate clap;
+
+mod cli;
+
 fn main() {
-    println!("Hello, world!");
+    cli::app::init();
 }
