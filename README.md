@@ -63,3 +63,12 @@
 ## 📄 License
 
 **Qipi** is licensed under the [MIT License](./LICENSE).
+
+
+<hr />
+
+<div align="right">
+
+##### Thanks to [Camilo Zuluaga](https://github.com/camilo-zuluaga) for creating the logo. ❤
+
+</div>
