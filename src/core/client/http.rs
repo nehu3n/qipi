@@ -20,3 +20,10 @@ pub async fn get_package(package: Package) -> Result<NPMPackage, String> {
         return Err("The registry passed as a parameter must be “npm” or “jsr”.".to_string());
     }
 }
+
+pub async fn get_tarball(url: String) -> Result<Vec<u8>, String> {
+    let response = reqwest::get(url).await.unwrap();
+    let tarball = response.bytes().await.unwrap().to_vec();
+
+    Ok(tarball)
+}

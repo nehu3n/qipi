@@ -1,7 +1,13 @@
 use clap::Parser;
 use regex::Regex;
 
-use crate::core::client::{http::get_package, response::Package};
+use crate::core::{
+    client::{
+        http::{get_package, get_tarball},
+        response::Package,
+    },
+    package::tarball::download_tarball,
+};
 
 use super::r#struct::{Commands, QipiCLI};
 
@@ -17,7 +23,13 @@ pub async fn init() {
                 package_parsed.registry = registry;
 
                 let package_obtained = get_package(package_parsed).await.unwrap();
-                println!("{:#?}", package_obtained)
+                println!("{:#?}", &package_obtained);
+
+                download_tarball(
+                    get_tarball(package_obtained.dist.tarball).await.unwrap(),
+                    ".",
+                )
+                .unwrap();
             }
         }
 
