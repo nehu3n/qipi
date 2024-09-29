@@ -5,6 +5,7 @@ extern crate serde;
 extern crate tokio;
 
 mod cli;
+mod config;
 mod core;
 
 #[tokio::main]
