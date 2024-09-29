@@ -41,3 +41,9 @@ pub fn download_tarball(
 
     Ok(())
 }
+
+pub fn has_tarball_in_cache(destination: &str, name: &str, version: &str) -> bool {
+    let cache_path = format!("{destination}{MAIN_SEPARATOR_STR}{name}@{version}");
+    
+    Path::new(&cache_path).exists()
+}

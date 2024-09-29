@@ -8,7 +8,7 @@ use crate::{
             http::{get_package, get_tarball},
             response::Package,
         },
-        package::tarball::download_tarball,
+        package::tarball::{download_tarball, has_tarball_in_cache},
     },
 };
 
@@ -28,13 +28,19 @@ pub async fn init() {
                 let package_obtained = get_package(package_parsed).await.unwrap();
                 println!("{:#?}", &package_obtained);
 
-                download_tarball(
-                    get_tarball(package_obtained.dist.tarball).await.unwrap(),
+                if !has_tarball_in_cache(
                     &get_cache_path(),
                     &package_obtained.name,
                     &package_obtained.version,
-                )
-                .unwrap();
+                ) {
+                    download_tarball(
+                        get_tarball(package_obtained.dist.tarball).await.unwrap(),
+                        &get_cache_path(),
+                        &package_obtained.name,
+                        &package_obtained.version,
+                    )
+                    .unwrap();
+                }
             }
         }
 
