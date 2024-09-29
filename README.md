@@ -1,4 +1,4 @@
-<img src="./logo.png" width="100" align="right" />
+<img src="./public/logo.png" width="100" align="right" />
 
 # Qipi - Package Manager
 
