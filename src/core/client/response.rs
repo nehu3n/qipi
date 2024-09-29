@@ -10,3 +10,10 @@ pub struct NPMPackage {
     pub devDependencies: Option<HashMap<String, String>>,
     pub peerDependencies: Option<HashMap<String, String>>,
 }
+
+pub struct Package {
+    pub author: String,
+    pub name: String,
+    pub version: String,
+    pub registry: String,
+}

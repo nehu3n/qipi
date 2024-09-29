@@ -1,7 +1,7 @@
 use clap::Parser;
 use regex::Regex;
 
-use crate::core::client::http::get_package;
+use crate::core::client::{http::get_package, response::Package};
 
 use super::r#struct::{Commands, QipiCLI};
 
@@ -11,25 +11,13 @@ pub async fn init() {
     match cli.cmds {
         Some(Commands::Add { packages, registry }) => {
             for package in packages {
-                let package_parsed = parse_package_entry(&package.as_str());
+                let mut package_parsed = parse_package_entry(&package.as_str()).unwrap();
                 let registry = registry.clone().unwrap_or("npm".to_string());
 
-                match package_parsed {
-                    Ok(pkg) => {
-                        let name = if !pkg.author.is_empty() {
-                            &format!("{}/{}", pkg.author, pkg.name)
-                        } else {
-                            &pkg.name
-                        };
+                package_parsed.registry = registry;
 
-                        let package_obtained = get_package(name, Some(&pkg.version), &registry)
-                            .await
-                            .unwrap();
-
-                        println!("{:#?}", package_obtained)
-                    }
-                    Err(e) => panic!("{}", e),
-                }
+                let package_obtained = get_package(package_parsed).await.unwrap();
+                println!("{:#?}", package_obtained)
             }
         }
 
@@ -39,12 +27,6 @@ pub async fn init() {
 
         None => (),
     }
-}
-
-struct Package {
-    pub author: String,
-    pub name: String,
-    pub version: String,
 }
 
 fn parse_package_entry(package: &str) -> Result<Package, String> {
@@ -65,6 +47,7 @@ fn parse_package_entry(package: &str) -> Result<Package, String> {
             author,
             name,
             version,
+            registry: "npm".to_string(),
         })
     } else {
         Err(format!("Invalid package format: {}", package))
