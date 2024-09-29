@@ -8,7 +8,7 @@ use crate::{
             http::{get_package, get_tarball},
             response::Package,
         },
-        package::tarball::{download_tarball, has_tarball_in_cache},
+        package::cache::tarball::{download_tarball, has_tarball_in_cache},
     },
 };
 
