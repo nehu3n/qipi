@@ -9,7 +9,12 @@ pub struct QipiCLI {
 #[derive(Subcommand, Clone)]
 pub enum Commands {
     /// Add packages to a project.
-    Add { packages: Vec<String> },
+    Add {
+        packages: Vec<String>,
+        
+        #[clap(long, short)]
+        registry: Option<String>,
+    },
 
     /// Remove packages from a project.
     Remove { packages: Vec<String> },

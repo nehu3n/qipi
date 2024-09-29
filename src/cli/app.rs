@@ -9,10 +9,11 @@ pub async fn init() {
     let cli = QipiCLI::parse();
 
     match cli.cmds {
-        Some(Commands::Add { packages }) => {
+        Some(Commands::Add { packages, registry }) => {
             for package in packages {
                 let package_parsed = parse_package_entry(&package.as_str());
-                let registry = "npm"; // TODO: Possibility to indicate registry by means of a flag "--registry <npm|jsr>".
+                let registry = registry.clone().unwrap_or("npm".to_string());
+
                 match package_parsed {
                     Ok(pkg) => {
                         let name = if !pkg.author.is_empty() {
@@ -21,7 +22,7 @@ pub async fn init() {
                             &pkg.name
                         };
 
-                        let package_obtained = get_package(name, Some(&pkg.version), registry)
+                        let package_obtained = get_package(name, Some(&pkg.version), &registry)
                             .await
                             .unwrap();
 
