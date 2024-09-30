@@ -8,7 +8,10 @@ use crate::{
             http::{get_package, get_tarball},
             response::Package,
         },
-        package::cache::tarball::{download_tarball, has_tarball_in_cache},
+        package::{
+            cache::tarball::{download_tarball, has_tarball_in_cache},
+            lockfile::{load_lockfile, update_lockfile, Lockfile, PackageInfo},
+        },
     },
 };
 
@@ -34,13 +37,37 @@ pub async fn init() {
                     &package_obtained.version,
                 ) {
                     download_tarball(
-                        get_tarball(package_obtained.dist.tarball).await.unwrap(),
+                        get_tarball(package_obtained.dist.tarball.clone())
+                            .await
+                            .unwrap(),
                         &get_cache_path(),
                         &package_obtained.name,
                         &package_obtained.version,
                     )
                     .unwrap();
                 }
+
+                let lockfile = load_lockfile(".").unwrap_or(Lockfile::new());
+
+                if lockfile.dependencies.contains_key(&package_obtained.name) {
+                    return;
+                }
+
+                let mut deps: Vec<String> = vec![];
+                let _ = &package_obtained.dependencies.map(|dependencies| {
+                    for (dependency_name, _) in dependencies {
+                        deps.push(dependency_name);
+                    }
+                });
+
+                let package_info = PackageInfo {
+                    version: package_obtained.version,
+                    resolved: package_obtained.dist.tarball,
+                    integrity: package_obtained.dist.integrity,
+                    dependencies: deps,
+                };
+
+                update_lockfile(".", &package_obtained.name, package_info).unwrap();
             }
         }
 
