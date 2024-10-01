@@ -1,5 +1,8 @@
 <img src="./public/logo.png" width="100" align="right" />
 
+> [!WARNING]
+> **Qipi** is in the development stage. It is not ready for any use at this time. ⏰
+
 # Qipi - Package Manager
 
 🦉 **Qipi** is a **blazing-fast**, **disk-efficient**, and **deterministic** package manager for NodeJS. **Written in Rust.**
