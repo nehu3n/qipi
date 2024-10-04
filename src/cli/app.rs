@@ -9,7 +9,10 @@ use crate::{
             response::Package,
         },
         package::{
-            cache::tarball::{download_tarball, has_tarball_in_cache},
+            cache::{
+                link::link_package,
+                tarball::{download_tarball, has_tarball_in_cache},
+            },
             lockfile::{load_lockfile, update_lockfile, Lockfile, PackageInfo},
         },
     },
@@ -46,6 +49,8 @@ pub async fn init() {
                     )
                     .unwrap();
                 }
+
+                link_package(&package_obtained.name, &package_obtained.version);
 
                 let lockfile = load_lockfile(".").unwrap_or(Lockfile::new());
 

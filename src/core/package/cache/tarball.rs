@@ -16,7 +16,7 @@ pub fn download_tarball(
     let name = normalize_package_name(name);
 
     let cache_path = format!(
-        "{destination}{MAIN_SEPARATOR_STR}{name}@{version}{MAIN_SEPARATOR_STR}node_modules{MAIN_SEPARATOR_STR}"
+        "{destination}{MAIN_SEPARATOR_STR}{name}{MAIN_SEPARATOR_STR}"
     );
 
     if !Path::new(&cache_path).exists() {
@@ -51,7 +51,7 @@ pub fn download_tarball(
 
     let package_path = format!("{cache_path}{MAIN_SEPARATOR_STR}package");
 
-    let new_package_path = format!("{cache_path}{MAIN_SEPARATOR_STR}{name}");
+    let new_package_path = format!("{cache_path}{MAIN_SEPARATOR_STR}{version}");
     if Path::new(&package_path).exists() {
         rename(package_path, new_package_path)
             .map_err(|e| format!("Error renaming package dir: {}", e))?;
