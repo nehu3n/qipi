@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use clap::Parser;
 use regex::Regex;
 
@@ -10,7 +12,7 @@ use crate::{
         },
         package::{
             cache::{
-                link::link_package,
+                link::{link_dependency, link_package},
                 tarball::{download_tarball, has_tarball_in_cache},
             },
             lockfile::{load_lockfile, update_lockfile, Lockfile, PackageInfo},
@@ -59,11 +61,24 @@ pub async fn init() {
                 }
 
                 let mut deps: Vec<String> = vec![];
+                let mut dependencies_map: Vec<(String, String)> = vec![];
                 let _ = &package_obtained.dependencies.map(|dependencies| {
-                    for (dependency_name, _) in dependencies {
-                        deps.push(dependency_name);
+                    for (dependency_name, dependency_version) in dependencies {
+                        deps.push(dependency_name.clone());
+                        dependencies_map
+                            .push((dependency_name.clone(), dependency_version.clone()));
                     }
                 });
+
+                let mut already_resolved: HashMap<String, String> = HashMap::new();
+
+                link_dependency(
+                    &package_obtained.name,
+                    &package_obtained.version,
+                    &dependencies_map,
+                    &mut already_resolved,
+                )
+                .await;
 
                 let package_info = PackageInfo {
                     version: package_obtained.version,
