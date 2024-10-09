@@ -28,29 +28,30 @@
 
 1. 📥 **Installation:**
 
-   - To install Qipi, use the following command:
-     ```bash
-     npm install -g qipi
-     ```
+To install Qipi, use the following command:
+
+```bash
+npm install -g qipi
+```
 
 2. 🌷 **Basic Usage:**
 
-   - To add a package:
+To add a package:
 
-     ```bash
-     qp add <package-name>
-     ```
+```bash
+qp add <package-name>
+```
 
-   - To remove a package:
+To remove a package:
 
-     ```bash
-     qp remove <package-name>
-     ```
+```bash
+qp remove <package-name>
+```
 
-   - To install all packages for a project:
-     ```bash
-     qp install
-     ```
+To install all packages for a project:
+```bash
+qp install
+```
 
 3. 🧩 **Configuration:**
    - You can configure Qipi by editing the `~/.qipi/config.toml` file.
