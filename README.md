@@ -63,11 +63,11 @@ You can configure Qipi by editing the `~/.qipi/config.toml` file.
 
 ## 📚 Documentation
 
-- For detailed documentation, visit the [Qipi Documentation](https://github.com/nehu3n/qipi/wiki).
+For detailed documentation, visit the [Qipi Documentation](https://github.com/nehu3n/qipi/wiki).
 
 ## 🤝 Contributing
 
-- Contributions are welcome! Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on how to contribute.
+Contributions are welcome! Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on how to contribute.
 
 ## 📄 License
 
