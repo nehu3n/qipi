@@ -10,7 +10,7 @@
 ## ✨ Features
 
 - ⚡ **Blazing-fast:**  
-  All fetching, downloading, unzipping, and linking operations are performed concurrently, making Qipi the fastest package manager for NodeJS. **Up to 20 times faster than NPM!** [(see benchmarks)](./tests/benchmarks/)
+  All fetching, downloading, unzipping, and linking operations are performed concurrently, making Qipi the fastest package manager for NodeJS. **Up to 100 times faster than NPM!** [(see benchmarks)](./tests/benchmarks/)
 
 - 💾 **Disk-efficient:**  
   All packages are stored in a global cache, preventing duplicate downloads. For each project, a symlink to its cached location is created. Intelligent algorithms clean up unused packages.
@@ -54,7 +54,12 @@ qp install
 ```
 
 3. 🧩 **Configuration:**
-   - You can configure Qipi by editing the `~/.qipi/config.toml` file.
+
+You can configure Qipi by editing the `~/.qipi/config.toml` file.
+
+## 📈 Benchmarks
+
+**Qipi** is the _fastest package manager_. You can see the different benchmarks [here](./tests/benchmarks).
 
 ## 📚 Documentation
 
