@@ -1,11 +1,5 @@
 use anyhow::{Context, Result};
 
-extern crate clap;
-extern crate regex;
-extern crate reqwest;
-extern crate serde;
-extern crate tokio;
-
 mod cli;
 mod config;
 mod core;
