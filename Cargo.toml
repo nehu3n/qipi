@@ -6,6 +6,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.94"
 clap = { version = "4.5.18", features = ["derive"] }
 flate2 = "1.0.34"
 regex = "1.10.6"
