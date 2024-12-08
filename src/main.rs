@@ -1,3 +1,5 @@
+use anyhow::{Context, Result};
+
 extern crate clap;
 extern crate regex;
 extern crate reqwest;
@@ -9,6 +11,8 @@ mod config;
 mod core;
 
 #[tokio::main]
-async fn main() {
-    cli::app::init().await;
+async fn main() -> Result<()> {
+    cli::app::init().await.context("Could not initialize CLI")?;
+
+    Ok(())
 }

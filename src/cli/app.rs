@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use anyhow::{Context, Result};
 use clap::Parser;
 use regex::Regex;
 
@@ -19,17 +20,21 @@ use crate::{
 
 use super::r#struct::{Commands, QipiCLI};
 
-pub async fn init() {
+pub async fn init() -> Result<()> {
     let cli = QipiCLI::parse();
 
     match cli.cmds {
         Some(Commands::Add { packages, registry }) => {
             for package in packages {
-                let mut package_parsed = parse_package_entry(&package.as_str()).unwrap();
+                let mut package_parsed =
+                    parse_package_entry(&package.as_str()).expect("Invalid package format");
 
-                package_parsed.registry = registry.as_ref().unwrap().clone();
+                package_parsed.registry = registry.as_ref().expect("No registry provided").clone();
 
-                let package_obtained = package_parsed.get_package().await.unwrap();
+                let package_obtained = package_parsed
+                    .get_package()
+                    .await
+                    .context("Could not get package")?;
                 println!("{:#?}", &package_obtained);
 
                 if !has_tarball_in_cache(
@@ -40,20 +45,20 @@ pub async fn init() {
                     download_tarball(
                         get_tarball(package_obtained.dist.tarball.clone())
                             .await
-                            .unwrap(),
+                            .context("Could not get tarball")?,
                         &get_cache_path(),
                         &package_obtained.name,
                         &package_obtained.version,
                     )
-                    .unwrap();
+                    .context("Could not download tarball")?;
                 }
 
-                link_package(&package_obtained.name, &package_obtained.version);
+                link_package(&package_obtained.name, &package_obtained.version).context("Could not link package")?;
 
                 let lockfile = load_lockfile(".").unwrap_or(Lockfile::new());
 
                 if lockfile.dependencies.contains_key(&package_obtained.name) {
-                    return;
+                    return Ok(());
                 }
 
                 let mut deps: Vec<String> = vec![];
@@ -74,7 +79,7 @@ pub async fn init() {
                     &dependencies_map,
                     &mut already_resolved,
                 )
-                .await;
+                .await.context("Could not link dependencies")?;
 
                 let package_info = PackageInfo {
                     version: package_obtained.version,
@@ -83,15 +88,18 @@ pub async fn init() {
                     dependencies: deps,
                 };
 
-                update_lockfile(".", &package_obtained.name, package_info).unwrap();
+                update_lockfile(".", &package_obtained.name, package_info)
+                    .expect("Could not update lockfile");
             }
+
+            Ok(())
         }
 
-        Some(Commands::Remove { packages: _ }) => (),
+        Some(Commands::Remove { packages: _ }) => Ok(()),
 
-        Some(Commands::Install) => (),
+        Some(Commands::Install) => Ok(()),
 
-        None => (),
+        None => Ok(()),
     }
 }
 
