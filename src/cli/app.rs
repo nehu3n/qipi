@@ -6,10 +6,7 @@ use regex::Regex;
 use crate::{
     config::get_cache_path,
     core::{
-        client::{
-            http::get_tarball,
-            response::Package,
-        },
+        client::{http::get_tarball, response::Package},
         package::{
             cache::{
                 link::{link_dependency, link_package},
@@ -99,18 +96,20 @@ pub async fn init() {
 }
 
 fn parse_package_entry(package: &str) -> Result<Package, String> {
-    let re = Regex::new(r"^(?:(?P<author>@[^/]+)/)?(?P<name>[^@]+)(?:@(?P<version>.+))?$").unwrap();
+    static PACKAGE_REGEX: &str = r"^(?:(?P<author>@[^/]+)/)?(?P<name>[^@]+)(?:@(?P<version>.+))?$";
+
+    let re: Regex = Regex::new(PACKAGE_REGEX).unwrap();
 
     if let Some(caps) = re.captures(package) {
         let author = caps
             .name("author")
-            .map(|m| m.as_str().to_string())
-            .unwrap_or("".to_string());
-        let name = caps["name"].to_string();
+            .map_or_else(String::new, |m| m.as_str().to_string());
+        let name = caps
+            .name("name")
+            .map_or_else(String::new, |m| m.as_str().to_string());
         let version = caps
             .name("version")
-            .map(|m| m.as_str().to_string())
-            .unwrap_or("latest".to_string());
+            .map_or_else(|| "latest".to_string(), |m| m.as_str().to_string());
 
         Ok(Package {
             author,
