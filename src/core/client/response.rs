@@ -29,7 +29,7 @@ impl From<&str> for Registry {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Package {
     pub author: String,
     pub name: String,

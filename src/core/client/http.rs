@@ -1,23 +1,28 @@
+use reqwest::Client;
+
 use super::response::{NPMPackage, Package, Registry};
 
-pub async fn get_package(package: Package) -> Result<NPMPackage, String> {
-    let name = if !package.author.is_empty() {
-        &format!("{}/{}", package.author, package.name)
-    } else {
-        &package.name
-    };
+impl Package {
+    pub async fn get_package(self) -> Result<NPMPackage, String> {
+        let name = if !self.author.is_empty() {
+            format!("{}/{}", self.author, self.name)
+        } else {
+            self.name
+        };
 
-    match &package.registry {
-        Registry::NPM => {
-            let registry_url = format!("https://registry.npmjs.org/{}/{}", name, package.version);
+        match &self.registry {
+            Registry::NPM => {
+                let registry_url = format!("https://registry.npmjs.org/{}/{}", name, self.version);
 
-            let response = reqwest::get(registry_url).await.unwrap();
-            let package = response.json::<NPMPackage>().await.unwrap();
+                let client = Client::new();
+                let response = client.get(&registry_url).send().await.unwrap();
+                let package = response.json::<NPMPackage>().await.unwrap();
 
-            return Ok(package);
-        }
-        Registry::JSR => {
-            todo!("Fetching packages from the JSR registry has not yet been implemented.")
+                Ok(package)
+            }
+            Registry::JSR => {
+                todo!("Fetching packages from the JSR registry has not yet been implemented.")
+            }
         }
     }
 }

@@ -7,7 +7,7 @@ use crate::{
     config::get_cache_path,
     core::{
         client::{
-            http::{get_package, get_tarball},
+            http::get_tarball,
             response::Package,
         },
         package::{
@@ -32,7 +32,7 @@ pub async fn init() {
 
                 package_parsed.registry = registry.as_ref().unwrap().clone();
 
-                let package_obtained = get_package(package_parsed).await.unwrap();
+                let package_obtained = package_parsed.get_package().await.unwrap();
                 println!("{:#?}", &package_obtained);
 
                 if !has_tarball_in_cache(
