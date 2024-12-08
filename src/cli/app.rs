@@ -29,9 +29,8 @@ pub async fn init() {
         Some(Commands::Add { packages, registry }) => {
             for package in packages {
                 let mut package_parsed = parse_package_entry(&package.as_str()).unwrap();
-                let registry = registry.clone().unwrap_or("npm".to_string());
 
-                package_parsed.registry = registry;
+                package_parsed.registry = registry.as_ref().unwrap().clone();
 
                 let package_obtained = get_package(package_parsed).await.unwrap();
                 println!("{:#?}", &package_obtained);
@@ -91,7 +90,7 @@ pub async fn init() {
             }
         }
 
-        Some(Commands::Remove { packages }) => (),
+        Some(Commands::Remove { packages: _ }) => (),
 
         Some(Commands::Install) => (),
 
@@ -117,7 +116,7 @@ fn parse_package_entry(package: &str) -> Result<Package, String> {
             author,
             name,
             version,
-            registry: "npm".to_string(),
+            ..Default::default()
         })
     } else {
         Err(format!("Invalid package format: {}", package))

@@ -12,11 +12,29 @@ pub struct NPMPackage {
     pub peerDependencies: Option<HashMap<String, String>>,
 }
 
+#[derive(Clone, Default)]
+pub enum Registry {
+    #[default]
+    NPM,
+    JSR,
+}
+
+impl From<&str> for Registry {
+    fn from(registry: &str) -> Self {
+        match registry {
+            "npm" => Self::NPM,
+            "jsr" => Self::JSR,
+            _ => Self::NPM,
+        }
+    }
+}
+
+#[derive(Default)]
 pub struct Package {
     pub author: String,
     pub name: String,
     pub version: String,
-    pub registry: String,
+    pub registry: Registry,
 }
 
 #[derive(Debug, Deserialize)]

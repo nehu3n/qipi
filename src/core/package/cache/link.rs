@@ -87,8 +87,7 @@ pub async fn link_dependency(
                             get_package(Package {
                                 name: dep_name.to_string(),
                                 version: dep_version.to_string(),
-                                author: "".to_string(),
-                                registry: "npm".to_string(),
+                                ..Default::default()
                             })
                             .await
                             .unwrap()
@@ -123,8 +122,7 @@ pub async fn link_dependency(
                     get_package(Package {
                         name: dep_name.to_string(),
                         version: dep_version.to_string(),
-                        author: "".to_string(),
-                        registry: "npm".to_string(),
+                        ..Default::default()
                     })
                     .await
                     .unwrap()
@@ -155,8 +153,7 @@ pub async fn link_dependency(
         if let Some(dep_deps) = get_package(Package {
             name: dep_name.to_string(),
             version: dep_version.to_string(),
-            author: "".to_string(),
-            registry: "npm".to_string(),
+            ..Default::default()
         })
         .await
         .unwrap()
@@ -192,5 +189,6 @@ fn get_package_cache_path(name: &str, version: &str) -> String {
     let name = name.replace("/", "+").to_string();
 
     let cache_path = get_cache_path();
-    format!("{cache_path}{MAIN_SEPARATOR_STR}{name}{MAIN_SEPARATOR_STR}{version}") // home/.qipi/cache/name/version
+    format!("{cache_path}{MAIN_SEPARATOR_STR}{name}{MAIN_SEPARATOR_STR}{version}")
+    // home/.qipi/cache/name/version
 }

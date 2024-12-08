@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
 
+use crate::core::client::response::Registry;
+
 #[derive(Parser)]
 pub struct QipiCLI {
     #[clap(subcommand)]
@@ -13,7 +15,7 @@ pub enum Commands {
         packages: Vec<String>,
         
         #[clap(long, short)]
-        registry: Option<String>,
+        registry: Option<Registry>,
     },
 
     /// Remove packages from a project.
