@@ -1,10 +1,10 @@
 use std::{
     collections::HashMap,
-    env,
     fs::create_dir_all,
     path::{Path, PathBuf, MAIN_SEPARATOR_STR},
 };
 
+use anyhow::{Context, Result};
 use regex::Regex;
 use symlink::symlink_auto;
 
@@ -15,41 +15,74 @@ use crate::{
 
 use super::tarball::download_tarball;
 
-pub fn link_package(name: &str, version: &str) {
+fn create_directory(path: &Path) -> Result<()> {
+    if !path.exists() {
+        create_dir_all(path).context("Failed to create directory")?;
+    }
+    Ok(())
+}
+
+fn create_symlink(target: &Path, link: &Path) -> Result<()> {
+    if !link.exists() {
+        symlink_auto(target, link).context(format!(
+            "Failed to create symlink from {} to {}",
+            link.display(),
+            target.display()
+        ))?;
+    }
+    Ok(())
+}
+
+pub fn link_package(name: &str, version: &str) -> Result<()> {
     println!("linking {}@{}", name, version);
 
     let package_cache_path = get_package_cache_path(name, version); // home/.qipi/cache/name/version/
-
     let project_root = Path::new("."); // proyect/
     let node_modules_dir = project_root.join("node_modules"); // proyect/node_modules
     let node_modules_qipi_dir = node_modules_dir.join(".qipi"); // proyect/node_modules/.qipi
     let package_versioned_dir = node_modules_qipi_dir.join(format!("{}@{}", name, version)); // proyect/node_modules/.qipi/name@version
     let package_node_modules_dir = package_versioned_dir.join("node_modules"); // proyect/node_modules/.qipi/name@version/node_modules
 
-    create_dir_all(&package_node_modules_dir).unwrap(); // proyect/node_modules/.qipi/name@version/node_modules
+    create_directory(&package_node_modules_dir)?; // proyect/node_modules/.qipi/name@version/node_modules
 
     let cache_package_path = PathBuf::from(&package_cache_path); // home/.qipi/cache/name/version/
     let symlink_target = package_node_modules_dir.join(name); // proyect/node_modules/.qipi/name@version/node_modules/name
 
-    if Path::new(&symlink_target).exists() {
-        return;
-    }
-
-    symlink_auto(&cache_package_path, &symlink_target).unwrap(); // proyect/node_modules/.qipi/name@version/node_modules/name -> home/.qipi/cache/name/version
+    create_symlink(&cache_package_path, &symlink_target)?; // proyect/node_modules/.qipi/name@version/node_modules/name -> home/.qipi/cache/name/version
 
     let symlink_target_in_project = node_modules_dir.join(name); // proyect/node_modules/name
-    if Path::new(&symlink_target_in_project).exists() {
-        return;
+    create_symlink(&symlink_target, &symlink_target_in_project)?; // proyect/node_modules/name -> proyect/node_modules/.qipi/name@version/node_modules/name
+
+    Ok(())
+}
+
+async fn download_and_symlink_dependency(
+    package: &Package,
+    dep_name: &str,
+    dep_version: &str,
+    package_node_modules_dir: &Path,
+) -> Result<()> {
+    let cache_dep_path = get_package_cache_path(dep_name, dep_version);
+
+    if !Path::new(&cache_dep_path).exists() {
+        download_tarball(
+            get_tarball(package.clone().get_package().await.unwrap().dist.tarball)
+                .await
+                .unwrap(),
+            &get_cache_path(),
+            dep_name,
+            dep_version,
+        )?;
     }
 
-    symlink_auto(
-        format!(
-            "{}{MAIN_SEPARATOR_STR}node_modules{MAIN_SEPARATOR_STR}.qipi{MAIN_SEPARATOR_STR}{name}@{version}{MAIN_SEPARATOR_STR}node_modules{MAIN_SEPARATOR_STR}{name}",
-            env::current_dir().unwrap().display()
-        ),
-        &symlink_target_in_project,
-    )
-    .unwrap() // proyect/node_modules/name -> proyect/node_modules/.qipi/name@version/node_modules/name
+    let symlink_target = package_node_modules_dir.join(dep_name);
+    create_symlink(&PathBuf::from(&cache_dep_path), &symlink_target)?;
+
+    let node_modules_dir = Path::new(".").join("node_modules");
+    let symlink_target_in_project = node_modules_dir.join(dep_name);
+    create_symlink(&symlink_target, &symlink_target_in_project)?;
+
+    Ok(())
 }
 
 pub async fn link_dependency(
@@ -57,17 +90,17 @@ pub async fn link_dependency(
     version: &str,
     dependencies: &[(String, String)],
     already_resolved: &mut HashMap<String, String>,
-) {
+) -> Result<()> {
     let project_root = Path::new("."); // proyect/
     let node_modules_dir = project_root.join("node_modules"); // proyect/node_modules/
     let node_modules_qipi_dir = node_modules_dir.join(".qipi"); // proyect/node_modules/.qipi/
     let package_versioned_dir = node_modules_qipi_dir.join(format!("{}@{}", package_name, version)); // proyect/node_modules/.qipi/package_name@version/
     let package_node_modules_dir = package_versioned_dir.join("node_modules"); // proyect/node_modules/.qipi/package_name@version/node_modules/
 
-    create_dir_all(&package_node_modules_dir).unwrap(); // proyect/node_modules/.qipi/package_name@version/node_modules/
+    create_directory(&package_node_modules_dir)?; // proyect/node_modules/.qipi/package_name@version/node_modules/
 
     for (dep_name, dep_version) in dependencies {
-        let dep_version = &parse_version(&dep_version).unwrap();
+        let dep_version = &parse_version(&dep_version)?;
 
         let package = Package {
             name: dep_name.to_string(),
@@ -76,60 +109,25 @@ pub async fn link_dependency(
         };
 
         if let Some(existing_version) = already_resolved.get(dep_name) {
-            if existing_version == dep_version {
-                continue;
-            } else {
+            if existing_version != dep_version {
                 let unique_symlink_target =
                     node_modules_qipi_dir.join(format!("{}@{}", dep_name, dep_version));
 
-                let cache_dep_path = get_package_cache_path(dep_name, dep_version); // home/.qipi/cache/dep_name/dep_version/
-
-                if !Path::new(&cache_dep_path).exists() {
-                    download_tarball(
-                        get_tarball(package.get_package().await.unwrap().dist.tarball)
-                            .await
-                            .unwrap(),
-                        &get_cache_path(),
+                if !Path::new(&unique_symlink_target).exists() {
+                    download_and_symlink_dependency(
+                        &package,
                         dep_name,
                         dep_version,
+                        &package_node_modules_dir,
                     )
-                    .unwrap();
+                    .await?;
                 }
-
-                if !Path::new(&unique_symlink_target).exists() {
-                    symlink_auto(&cache_dep_path, &unique_symlink_target).unwrap_or_else(|e| {
-                        eprintln!("Error creating symlink {}: {:?}", dep_name, e);
-                    });
-                }
-
                 continue;
             }
         }
 
-        let cache_dep_path = get_package_cache_path(dep_name, dep_version); // home/.qipi/cache/dep_name/dep_version/
-        let symlink_target = package_node_modules_dir.join(dep_name); // proyect/node_modules/.qipi/package_name@version/node_modules/dep_name
-
-        if !Path::new(&cache_dep_path).exists() {
-            download_tarball(
-                get_tarball(package.clone().get_package().await.unwrap().dist.tarball)
-                    .await
-                    .unwrap(),
-                &get_cache_path(),
-                dep_name,
-                dep_version,
-            )
-            .unwrap();
-        }
-
-        if !Path::new(&symlink_target).exists() {
-            symlink_auto(&cache_dep_path, &symlink_target).unwrap(); // proyect/node_modules/.qipi/package_name@version/node_modules/dep_name -> home/.qipi/cache/dep_name/dep_version/
-        }
-
-        let symlink_target_in_project = node_modules_dir.join(dep_name); // proyect/node_modules/dep_name
-
-        if !Path::new(&symlink_target_in_project).exists() {
-            symlink_auto(&symlink_target, &symlink_target_in_project).unwrap(); // proyect/node_modules/dep_name -> proyect/node_modules/.qipi/package_name@version/node_modules/dep_name
-        }
+        download_and_symlink_dependency(&package, dep_name, dep_version, &package_node_modules_dir)
+            .await?;
 
         already_resolved.insert(dep_name.clone(), dep_version.clone());
 
@@ -142,21 +140,29 @@ pub async fn link_dependency(
                     &dep_list,
                     already_resolved,
                 ))
-                .await;
+                .await
+                .context("Failed to link dependency")?;
             }
         }
     }
+
+    Ok(())
 }
 
-fn parse_version(version_str: &str) -> Result<String, String> {
-    let re = Regex::new(r"^(>=|<=|>|<|=|~|\^)?\s*([0-9]+(?:\.[0-9]+)*(?:\.[0-9]+)?)").unwrap();
+fn parse_version(version_str: &str) -> Result<String> {
+    let re = Regex::new(r"^(>=|<=|>|<|=|~|\^)?\s*([0-9]+(?:\.[0-9]+)*(?:\.[0-9]+)?)")
+        .context("Invalid version range format")?;
 
-    if let Some(caps) = re.captures(version_str) {
-        let version = caps.get(2).map_or("", |m| m.as_str());
+    match re.captures(version_str) {
+        Some(caps) => {
+            let version = caps.get(2).map_or("", |m| m.as_str());
 
-        Ok(version.to_string())
-    } else {
-        Err(format!("Invalid version range format: {}", version_str))
+            Ok(version.to_string())
+        }
+        None => Err(anyhow::anyhow!(
+            "Invalid version range format: {}",
+            version_str
+        )),
     }
 }
 
