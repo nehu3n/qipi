@@ -7,7 +7,7 @@ use regex::Regex;
 use crate::{
     config::get_cache_path,
     core::{
-        client::{http::get_tarball, response::Package},
+        client::{http::get_tarball, response::{Package, Registry}},
         package::{
             cache::{
                 link::{link_dependency, link_package},
@@ -29,7 +29,7 @@ pub async fn init() -> Result<()> {
                 let mut package_parsed =
                     parse_package_entry(&package.as_str()).expect("Invalid package format");
 
-                package_parsed.registry = registry.as_ref().expect("No registry provided").clone();
+                package_parsed.registry = registry.as_ref().unwrap_or(&Registry::NPM).clone();
 
                 let package_obtained = package_parsed
                     .get_package()
