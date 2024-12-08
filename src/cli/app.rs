@@ -53,7 +53,8 @@ pub async fn init() -> Result<()> {
                     .context("Could not download tarball")?;
                 }
 
-                link_package(&package_obtained.name, &package_obtained.version).context("Could not link package")?;
+                link_package(&package_obtained.name, &package_obtained.version)
+                    .context("Could not link package")?;
 
                 let lockfile = load_lockfile(".").unwrap_or(Lockfile::new());
 
@@ -79,7 +80,8 @@ pub async fn init() -> Result<()> {
                     &dependencies_map,
                     &mut already_resolved,
                 )
-                .await.context("Could not link dependencies")?;
+                .await
+                .context("Could not link dependencies")?;
 
                 let package_info = PackageInfo {
                     version: package_obtained.version,
@@ -103,10 +105,10 @@ pub async fn init() -> Result<()> {
     }
 }
 
-fn parse_package_entry(package: &str) -> Result<Package, String> {
+fn parse_package_entry(package: &str) -> Result<Package> {
     static PACKAGE_REGEX: &str = r"^(?:(?P<author>@[^/]+)/)?(?P<name>[^@]+)(?:@(?P<version>.+))?$";
 
-    let re: Regex = Regex::new(PACKAGE_REGEX).unwrap();
+    let re: Regex = Regex::new(PACKAGE_REGEX).context("Invalid package regex")?;
 
     if let Some(caps) = re.captures(package) {
         let author = caps
@@ -126,6 +128,6 @@ fn parse_package_entry(package: &str) -> Result<Package, String> {
             ..Default::default()
         })
     } else {
-        Err(format!("Invalid package format: {}", package))
+        Err(anyhow::anyhow!("Invalid package format: {}", package))
     }
 }
